@@ -12,6 +12,6 @@ router.get('/capture-order', paymentController.captureOrder);
 
 router.get('/cancel-order', paymentController.cancelPayment);
 
-router.get('/INSERT', carritoModel.INSERT);
+router.post('/INSERT', carritoModel.INSERT);
 
 export default router;

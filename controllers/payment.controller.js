@@ -4,25 +4,30 @@ import {
   PAYPAL_API_CLIENT,
   PAYPAL_API_SECRET,
 } from "../config.js"
-import { getDataController } from "../controllers/getdata.controllers.js"
 import axios from "axios";
 import { carritoModel } from "../models/crud.js";
 
 export class paymentController {
 
   static async createOrder(req, res) {
-    const { totales } = await getDataController.TOTALES(req, res);
-    let total = JSON.stringify(totales.Total_Neto);
 
-    //crear el archivo de la orden
+    const IdUsuario = 1;
+
+    const respon = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', {IdUsuario} );
+    console.log('Respuesta de la API de precios:', respon.data);
+
+    const totalNeto = respon.data.totalNeto;
+    const divisa = respon.data.divisa;
+
+    console.log(totalNeto, divisa);
     const order = {
       intent: "CAPTURE",
       //productos
       purchase_units: [
         {
           amount: {
-            currency_code: totales.Divisa,
-            value: total,
+            currency_code: divisa,
+            value: totalNeto,
           },
         },
       ],
@@ -78,27 +83,24 @@ export class paymentController {
       // Extraer información relevante del objeto response.data
       const { id, status, payer, purchase_units } = response.data;
 
-      const {totales, productos} = await getDataController.TOTALES(req, res);
-      const ID_USUARIO = Number(totales.IdUsuario);
-      const TOTAL_BRUTO = totales.Total_Bruto;
-      const METODO_PAGO = 'PAY-PAL';
-      const TOTAL_NETO = totales.Total_Neto;
-      const DIVISA_PAGADA = totales.Divisa;
+      const IdUsuario = 1; 
 
-      console.log(response.data);
+      let infoVenta = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', { IdUsuario });
+      console.log('Respuesta de la API de precios:', infoVenta.data);
+
+      const totalNeto = infoVenta.data.totalNeto;
+      const divisa = infoVenta.data.divisa;
+      const usuario = infoVenta.data.IdUsuario;
+      const product = infoVenta.data.list;
+      const METODO_PAGO = 'PAY-PAL';
+
+      res.json(totalNeto, divisa, usuario, product);
 
       if (status === 'COMPLETED') {
-        await carritoModel.INSERT(ID_USUARIO, TOTAL_BRUTO, DIVISA_PAGADA, METODO_PAGO, TOTAL_NETO, productos);
+        await carritoModel.INSERT(usuario, totalNeto, divisa, METODO_PAGO, product);
         res.status(200).json({ message: 'Orden insertada correctamente' });
-      } else {
-        res.json({
-          orderId: id,
-          status: status,
-          payerName: `${payer.name.given_name} ${payer.name.surname}`,
-          payerEmail: payer.email_address,
-          purchaseUnits: purchase_units,
-        });
       }
+      
     } catch (error) {
       console.error('Error al capturar el pedido:', error);
       res.status(500).send('Error interno del servidor');
@@ -107,5 +109,5 @@ export class paymentController {
 
   static async cancelPayment(req, res) {
     res.json("venta cancelada");
-  }
+  };
 }
