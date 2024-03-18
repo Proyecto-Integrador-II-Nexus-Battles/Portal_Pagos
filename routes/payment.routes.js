@@ -2,7 +2,7 @@ import {Router} from 'express' //Modulo especial que se llama router
 import { 
     paymentController
 } from "../controllers/payment.controller.js"
-import { carritoModel } from "../models/crud.js"
+import { transaccionModel } from "../models/crud.js"
 
 const router = Router() //objetos para peticiones (post, put, delete, get)
 
@@ -12,6 +12,8 @@ router.get('/capture-order', paymentController.captureOrder);
 
 router.get('/cancel-order', paymentController.cancelPayment);
 
-router.post('/INSERT', carritoModel.INSERT);
+router.post('/bought-Cards', paymentController.boughtCards);
+
+router.post('/INSERT', transaccionModel.INSERT);
 
 export default router;

@@ -20,10 +20,7 @@ console.log("Server on port", PORT);
 
 app.post('/asdsad', (req, res) => {
     const listaPreciosSimulados = [
-      { carta_id: 99, precio: 5.99, divisa: 'USD' },
-      { carta_id: 95, precio: 3.49, divisa: 'USD' },
-      { carta_id: 96, precio: 4.49, divisa: 'USD' },
-      { carta_id: 92, precio: 2.49, divisa: 'USD' },
+      { carta_id: 92, precio: 5.99, divisa: 'USD' },
 ];
   
     res.json(listaPreciosSimulados);

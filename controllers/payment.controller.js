@@ -5,12 +5,13 @@ import {
   PAYPAL_API_SECRET,
 } from "../config.js"
 import axios from "axios";
-import { carritoModel } from "../models/crud.js";
+import { transaccionModel } from "../models/crud.js";
 
 export class paymentController {
 
   static async createOrder(req, res) {
 
+    //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
     const IdUsuario = 1;
 
     const respon = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', {IdUsuario} );
@@ -83,6 +84,7 @@ export class paymentController {
       // Extraer información relevante del objeto response.data
       const { id, status, payer, purchase_units } = response.data;
 
+      //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
       const IdUsuario = 1; 
 
       let infoVenta = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', { IdUsuario });
@@ -94,11 +96,12 @@ export class paymentController {
       const product = infoVenta.data.list;
       const METODO_PAGO = 'PAY-PAL';
 
-      res.json(totalNeto, divisa, usuario, product);
-
+      console.log(product);
+      
+      
       if (status === 'COMPLETED') {
-        await carritoModel.INSERT(usuario, totalNeto, divisa, METODO_PAGO, product);
-        res.status(200).json({ message: 'Orden insertada correctamente' });
+        await transaccionModel.INSERT(usuario, totalNeto, divisa, METODO_PAGO, product);
+        res.status(200).json({ message: 'Orden pagada correctamente' });
       }
       
     } catch (error) {
@@ -110,4 +113,17 @@ export class paymentController {
   static async cancelPayment(req, res) {
     res.json("venta cancelada");
   };
+
+  static async boughtCards(req, res){
+    const { IdUsuario } = req.body;
+    console.log(IdUsuario);
+    try{
+      const cards = await transaccionModel.GETCARD(1);
+      res.json(cards);
+    }catch(error){
+      console.error(error);
+      res.status(500).json({ error: 'Error al buscar cartas' });
+    }
+  }
+
 }
