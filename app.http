@@ -1,0 +1,3 @@
+//GET http://localhost:5000/DETALLES_ORDEN
+
+GET http://localhost:5000/LIST-PRODUCTS
