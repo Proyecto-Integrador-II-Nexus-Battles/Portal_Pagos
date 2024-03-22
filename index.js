@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
-app.use('/carro_compras', paymentRoutes);
+app.use('/portal_pagos', paymentRoutes);
 
 app.use(express.static(path.resolve("public")));
 app.set("views", path.resolve("views"));

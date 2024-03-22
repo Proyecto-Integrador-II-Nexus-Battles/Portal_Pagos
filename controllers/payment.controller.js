@@ -11,10 +11,11 @@ export class paymentController {
 
   static async createOrder(req, res) {
 
+    // const { IdUsuario } = req.body;
     //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
     const IdUsuario = 1;
 
-    const respon = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', {IdUsuario} );
+    const respon = await axios.post('http://localhost:4000/carro_compras/PRICE-CARD', {IdUsuario} );
     console.log('Respuesta de la API de precios:', respon.data);
 
     const totalNeto = respon.data.totalNeto;
@@ -63,7 +64,8 @@ export class paymentController {
     });
 
     console.log(response.data);
-    return res.json(response.data);
+    const paypalUrl = response.data.links[1].href;
+    res.json({ paypalUrl });
   };
 
   static async captureOrder(req, res) {
@@ -87,7 +89,8 @@ export class paymentController {
       //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
       const IdUsuario = 1; 
 
-      let infoVenta = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', { IdUsuario });
+      let infoVenta = await axios.post('http://localhost:4000/carro_compras/PRICE-CARD', { IdUsuario });
+      const products = await axios.post('http://localhost:4000/carro_compras/LIST_CARD', { IdUsuario });
       console.log('Respuesta de la API de precios:', infoVenta.data);
 
       const totalNeto = infoVenta.data.totalNeto;
@@ -101,7 +104,8 @@ export class paymentController {
       
       if (status === 'COMPLETED') {
         await transaccionModel.INSERT(usuario, totalNeto, divisa, METODO_PAGO, product);
-        res.status(200).json({ message: 'Orden pagada correctamente' });
+        const mibanco = await axios.post('http://localhost:4000/inventario/add-cards', { products }); 
+        res.status(200).json({ message: 'Orden pagada correctamente', mibanco});
       }
       
     } catch (error) {
