@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
-app.use('/carro_compras', paymentRoutes);
+app.use('/portal_pagos', paymentRoutes);
 
 app.use(express.static(path.resolve("public")));
 app.set("views", path.resolve("views"));
@@ -21,6 +21,9 @@ console.log("Server on port", PORT);
 app.post('/asdsad', (req, res) => {
     const listaPreciosSimulados = [
       { carta_id: 92, precio: 5.99, divisa: 'USD' },
+      { carta_id: 93, precio: 7.99, divisa: 'USD' },
+      { carta_id: 94, precio: 8.99, divisa: 'USD' },
+      { carta_id: 96, precio: 9.99, divisa: 'USD' },
 ];
   
     res.json(listaPreciosSimulados);

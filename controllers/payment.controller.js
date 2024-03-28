@@ -11,23 +11,21 @@ export class paymentController {
 
   static async createOrder(req, res) {
 
-    //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
-    const IdUsuario = 1;
+    const { IdUsuario } = req.body;
 
-    const respon = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', {IdUsuario} );
+    const respon = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/PRICE-CARD`, { IdUsuario });
     console.log('Respuesta de la API de precios:', respon.data);
 
-    const totalNeto = respon.data.totalNeto;
-    const divisa = respon.data.divisa;
+    const totalNeto = parseInt((respon.data.totalNeto)/3900);
 
-    console.log(totalNeto, divisa);
+    console.log(totalNeto, IdUsuario);
     const order = {
       intent: "CAPTURE",
       //productos
       purchase_units: [
         {
           amount: {
-            currency_code: divisa,
+            currency_code: 'USD',
             value: totalNeto,
           },
         },
@@ -37,8 +35,8 @@ export class paymentController {
         brand_name: "THE NEXUS BATTLE II",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
-        return_url: `${HOST}/carro_compras/capture-order`,
-        cancel_url: `${HOST}/carro_compras/cancel-order`,
+        return_url: `http://${HOST}/portal_pagos/capture-order?IdUsuario=${IdUsuario}`,
+        cancel_url: `${HOST}/portal_pagos/cancel-order`,
       },
     };
 
@@ -63,11 +61,12 @@ export class paymentController {
     });
 
     console.log(response.data);
-    return res.json(response.data);
+    const paypalUrl = response.data.links[1].href;
+    res.json({ paypalUrl });
   };
 
   static async captureOrder(req, res) {
-    const { token } = req.query; //guardo el valor de token que sirve para enviarle a paypal que el usuario acepto
+    const { token, IdUsuario } = req.query; //guardo el valor de token que sirve para enviarle a paypal que el usuario acepto
 
     try {
       const response = await axios.post(
@@ -84,26 +83,25 @@ export class paymentController {
       // Extraer información relevante del objeto response.data
       const { id, status, payer, purchase_units } = response.data;
 
-      //falta que los de registro de usuario manden el id de usuario logeado, asi que uso uno de prueba, nada mas seria cambiar esa linea
-      const IdUsuario = 1; 
-
-      let infoVenta = await axios.post('http://localhost:5000/carro_compras/PRICE-CARD', { IdUsuario });
-      console.log('Respuesta de la API de precios:', infoVenta.data);
+      let infoVenta = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/PRICE-CARD`, { IdUsuario });
+      const cartas = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/LIST-CARD`, { IdUsuario });
 
       const totalNeto = infoVenta.data.totalNeto;
       const divisa = infoVenta.data.divisa;
-      const usuario = infoVenta.data.IdUsuario;
-      const product = infoVenta.data.list;
+      const product = infoVenta.data.list_price_unit;
       const METODO_PAGO = 'PAY-PAL';
 
-      console.log(product);
-      
-      
+      const products = cartas.data.cartas;
+
+      console.log(products);
+
+
       if (status === 'COMPLETED') {
-        await transaccionModel.INSERT(usuario, totalNeto, divisa, METODO_PAGO, product);
-        res.status(200).json({ message: 'Orden pagada correctamente' });
+        await transaccionModel.INSERT(IdUsuario, totalNeto, divisa, METODO_PAGO, product);
+        const mibanco = await axios.post(`${process.env.HOST_MI_BANCO}:${process.env.PORT_MI_BANCO}/inventario/add-cards`, { cartas: products }); 
+        res.status(200).json({ message: 'Orden pagada correctamente'});
       }
-      
+
     } catch (error) {
       console.error('Error al capturar el pedido:', error);
       res.status(500).send('Error interno del servidor');
@@ -114,13 +112,13 @@ export class paymentController {
     res.json("venta cancelada");
   };
 
-  static async boughtCards(req, res){
+  static async boughtCards(req, res) {
     const { IdUsuario } = req.body;
     console.log(IdUsuario);
-    try{
+    try {
       const cards = await transaccionModel.GETCARD(1);
       res.json(cards);
-    }catch(error){
+    } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Error al buscar cartas' });
     }
