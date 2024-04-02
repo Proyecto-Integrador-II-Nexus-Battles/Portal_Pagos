@@ -13,7 +13,7 @@ export class paymentController {
 
     const { IdUsuario } = req.body;
 
-    const respon = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/PRICE-CARD`, { IdUsuario });
+    const respon = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/INFO-CARDS`, { IdUsuario });
     console.log('Respuesta de la API de precios:', respon.data);
 
     const totalNeto = parseInt((respon.data.totalNeto)/3900);
@@ -83,22 +83,22 @@ export class paymentController {
       // Extraer información relevante del objeto response.data
       const { id, status, payer, purchase_units } = response.data;
 
-      let infoVenta = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/PRICE-CARD`, { IdUsuario });
+      let infoVenta = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/INFO-CARDS`, { IdUsuario });
       const cartas = await axios.post(`${process.env.HOST_CARRO_COMPRAS}:${process.env.PORT_CARRO_COMPRAS}/carro_compras/LIST-CARD`, { IdUsuario });
 
       const totalNeto = infoVenta.data.totalNeto;
-      const divisa = infoVenta.data.divisa;
+      const divisa = 'COP';
       const product = infoVenta.data.list_price_unit;
       const METODO_PAGO = 'PAY-PAL';
 
       const products = cartas.data.cartas;
 
-      console.log(products);
+      console.log(product);
 
 
       if (status === 'COMPLETED') {
         await transaccionModel.INSERT(IdUsuario, totalNeto, divisa, METODO_PAGO, product);
-        const mibanco = await axios.post(`${process.env.HOST_MI_BANCO}:${process.env.PORT_MI_BANCO}/inventario/add-cards`, { cartas: products }); 
+        const mibanco = await axios.post(`${process.env.HOST_INVENTARIO}:${process.env.PORT_INVENTARIO}/inventario/add-cards`, { cartas: products }); 
         res.status(200).json({ message: 'Orden pagada correctamente'});
       }
 

@@ -21,7 +21,7 @@ export class transaccionModel {
       for (const carta of product) {
         const resultCartas = await pool.query(
           `INSERT INTO ITEM_CARTAS (CARTAS_ID, CANTIDAD, DETALLES_ORDEN_ID) VALUES (?, ?, ?)`,
-          [carta, 2, detallesOrdenID]
+          [carta.CARTA_ID, carta.CANTIDAD, detallesOrdenID]
         );
       }
 
