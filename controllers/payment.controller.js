@@ -138,7 +138,13 @@ export class paymentController {
           { cartas: products },
           options
         );
-        res.redirect(`www.thenexusbattlesii.online`);
+        const borrar_carro = await axios.post(
+          `
+          ${HOST}:${PORT}/carro/DELETE-SHOPPING-CART`,
+          {},
+          options
+        );
+        res.status(200).json({ message: "Venta completada" });
       }
     } catch (error) {
       console.error("Error al capturar el pedido:", error);
