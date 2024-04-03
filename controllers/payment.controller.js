@@ -12,9 +12,17 @@ export class paymentController {
   static async createOrder(req, res) {
     const { IdUsuario } = req.body;
 
-    const respon = await axios.post(`${HOST}:${PORT}/carro/INFO-CARDS`, {
-      IdUsuario,
-    });
+    const options = {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    };
+
+    const respon = await axios.post(
+      `${HOST}:${PORT}/carro/INFO-CARDS`,
+      {},
+      options
+    );
     console.log("Respuesta de la API de precios:", respon.data);
 
     const totalNeto = parseInt(respon.data.totalNeto / 3900);
@@ -36,8 +44,12 @@ export class paymentController {
         brand_name: "THE NEXUS BATTLE II",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
-        return_url: `${HOST}:${PORT}/pagos/capture-order?IdUsuario=${IdUsuario}`,
-        cancel_url: `${HOST}:${PORT}/pagos/cancel-order`,
+        return_url: `${HOST}:${PORT}/pagos/capture-order?IdUsuario=${IdUsuario}&tokenApp=${
+          req.headers.authorization.split(" ")[1]
+        }`,
+        cancel_url: `${HOST}:${PORT}/pagos/cancel-order?tokenApp=${
+          req.headers.authorization.split(" ")[1]
+        }`,
       },
     };
 
@@ -88,12 +100,21 @@ export class paymentController {
       // Extraer información relevante del objeto response.data
       const { id, status, payer, purchase_units } = response.data;
 
-      let infoVenta = await axios.post(`${HOST}:${PORT}/carro/INFO-CARDS`, {
-        IdUsuario,
-      });
-      const cartas = await axios.post(`${HOST}:${PORT}/carro/LIST-CARD`, {
-        IdUsuario,
-      });
+      const options = {
+        headers: { Authorization: `Bearer ${req.query.tokenApp}` },
+      };
+
+      let infoVenta = await axios.post(
+        `${HOST}:${PORT}/carro/INFO-CARDS`,
+        {},
+        options
+      );
+
+      const cartas = await axios.post(
+        `${HOST}:${PORT}/carro/LIST-CARD`,
+        {},
+        options
+      );
 
       const totalNeto = infoVenta.data.totalNeto;
       const divisa = "COP";
@@ -114,9 +135,10 @@ export class paymentController {
         );
         const mibanco = await axios.post(
           `${HOST}:${PORT}/inventario/add-cards`,
-          { cartas: products }
+          { cartas: products },
+          options
         );
-        res.status(200).json({ message: "Orden pagada correctamente" });
+        res.redirect(`www.thenexusbattlesii.online`);
       }
     } catch (error) {
       console.error("Error al capturar el pedido:", error);
