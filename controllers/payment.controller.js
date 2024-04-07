@@ -144,7 +144,7 @@ export class paymentController {
           {},
           options
         );
-        res.status(200).json({ message: "Venta completada" });
+        res.redirect(`/pagos/success?tokenApp=${req.query.tokenApp}`);
       }
     } catch (error) {
       console.error("Error al capturar el pedido:", error);
@@ -166,5 +166,9 @@ export class paymentController {
       console.error(error);
       res.status(500).json({ error: "Error al buscar cartas" });
     }
+  }
+
+  static async renderSuccess(req, res) {
+    res.render("index");
   }
 }

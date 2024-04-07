@@ -1,0 +1,44 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+.container {
+  text-align: center;
+}
+.success-message {
+  font-size: 40px;
+  color: #616b76;
+  margin-bottom: 20px;
+  stroke: 4px;
+}
+.image-container {
+  margin-top: 20px;
+}
+.image-container img {
+  max-width: 20%;
+  height: auto;
+}
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #465668;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
