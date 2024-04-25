@@ -1,0 +1,16 @@
+services:
+  pagos:
+    image: davopaco/portal_pagos:latest
+    ports:
+      - "4000:3000"
+    environment:
+      - APP_PORT=3000
+      - HOST_DB=buey.thenexusbattlesii.online
+      - PORT_DB=3309
+      - USER_DB=root
+      - PASSWORD_DB=my-password
+      - DATABASE=PORTAL_PAGOS
+      - HOST=https://gateway.thenexusbattlesii.online
+      - PORT=5000
+      - PAYPAL_API_CLIENT=AbtsLQ_5xEn2YlnaoE9g5fVnHwvIDDKk0PZXKl2EMz70n5sNZ0mZUIhEKYYCB1QjpB6piC6EYkvsg7qm
+      - PAYPAL_API_SECRET=EJ9RQW8lAfWqL_oKWgmlnA_J77uFFcasnD4gVa6XlZqCUXTrBbXk1mkk5_Qh3HTiYVj_HMEobCy6zWt3
